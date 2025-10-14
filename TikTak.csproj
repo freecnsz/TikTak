@@ -57,6 +57,7 @@
 
   <!-- Resource Files -->
   <ItemGroup>
+    <EmbeddedResource Include="icon.ico" />
     <None Update="icon.ico">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
