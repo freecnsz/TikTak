@@ -18,6 +18,7 @@ bld/
 [Oo]bj/
 [Ll]og/
 [Ll]ogs/
+/dist
 
 # Visual Studio 2015/2017/2019/2022 cache/options directory
 .vs/
@@ -40,6 +41,17 @@ nunit-*.xml
 [Dd]ebugPS/
 [Rr]eleasePS/
 dlldata.c
+
+# WiX Build Artifacts
+*.msi
+*.msm
+*.wixpdb
+*.wixobj
+
+# Release/Distribution files
+/dist/
+/release/
+*.zip
 
 # Benchmark Results
 BenchmarkDotNet.Artifacts/
@@ -393,3 +405,10 @@ $RECYCLE.BIN/
 
 # Windows shortcuts
 *.lnk
+
+# WiX temporary files  
+Product.wxs
+*.wixproj
+
+# Keep winget manifests (for package submission)
+!winget/
