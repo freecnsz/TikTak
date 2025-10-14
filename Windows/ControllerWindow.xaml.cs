@@ -583,23 +583,36 @@ namespace TikTak.Windows
         {
             _notifyIcon = new NotifyIcon();
             
-            _notifyIcon.Icon = SystemIcons.Application;
-            
-            Task.Run(() => {
-                try 
+            try 
+            {
+                // Try to load from embedded resource first
+                var assembly = System.Reflection.Assembly.GetExecutingAssembly();
+                using (var stream = assembly.GetManifestResourceStream("TikTak.icon.ico"))
                 {
-                    var iconPath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "icon.ico");
-                    if (System.IO.File.Exists(iconPath))
+                    if (stream != null)
                     {
-                        var icon = new System.Drawing.Icon(iconPath);
-                        this.Dispatcher.Invoke(() => _notifyIcon.Icon = icon);
+                        _notifyIcon.Icon = new System.Drawing.Icon(stream);
+                    }
+                    else
+                    {
+                        // Fallback to file system
+                        var iconPath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "icon.ico");
+                        if (System.IO.File.Exists(iconPath))
+                        {
+                            _notifyIcon.Icon = new System.Drawing.Icon(iconPath);
+                        }
+                        else
+                        {
+                            _notifyIcon.Icon = SystemIcons.Application;
+                        }
                     }
                 }
-                catch (System.Exception ex)
-                {
-                    System.Diagnostics.Debug.WriteLine($"Icon yükleme hatası: {ex.Message}");
-                }
-            });
+            }
+            catch (System.Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Icon yükleme hatası: {ex.Message}");
+                _notifyIcon.Icon = SystemIcons.Application;
+            }
             
             _notifyIcon.Text = $"TikTak - {TitleTextBlock.Text} - Ctrl+Shift+T";
             _notifyIcon.Visible = true;
