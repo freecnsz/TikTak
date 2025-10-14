@@ -1,0 +1,180 @@
+<Window x:Class="TikTak.Windows.AboutWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="TikTak - Hakkında" 
+        Height="500" Width="450"
+        WindowStartupLocation="CenterOwner"
+        ResizeMode="NoResize"
+        Background="#F8F9FA"
+        Topmost="True"
+        WindowStyle="SingleBorderWindow"
+        FontFamily="Segoe UI">
+    
+    <Window.Resources>
+        <!-- Modern Button Style -->
+        <Style x:Key="ModernButton" TargetType="Button">
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}" 
+                            CornerRadius="6"
+                            Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" 
+                                    VerticalAlignment="Center"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
+
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <StackPanel Grid.Row="0" HorizontalAlignment="Center" Margin="0,0,0,20">
+            <TextBlock Text="TikTak" FontSize="28" FontWeight="Bold" HorizontalAlignment="Center" Foreground="#2C3E50"/>
+            <TextBlock Text="Profesyonel Sunum Sayacı" FontSize="14" HorizontalAlignment="Center" Foreground="#7F8C8D" Margin="0,5"/>
+        </StackPanel>
+
+        <!-- Content -->
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+            <StackPanel>
+                
+                <!-- Version Info -->
+                <GroupBox Header="Uygulama Bilgileri" Margin="0,0,0,15" Padding="15">
+                    <StackPanel>
+                        <Grid Margin="0,5">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="100"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="Sürüm:" FontWeight="SemiBold"/>
+                            <TextBlock Grid.Column="1" Text="1.0.0"/>
+                        </Grid>
+                        <Grid Margin="0,5">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="100"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="Geliştirici:" FontWeight="SemiBold"/>
+                            <TextBlock Grid.Column="1" Text="freecnsz"/>
+                        </Grid>
+                        <Grid Margin="0,5">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="100"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="Tarih:" FontWeight="SemiBold"/>
+                            <TextBlock Grid.Column="1" Text="Ekim 2025"/>
+                        </Grid>
+                    </StackPanel>
+                </GroupBox>
+
+                <!-- How to Use -->
+                <GroupBox Header="Nasıl Kullanılır" Margin="0,0,0,15" Padding="15">
+                    <StackPanel>
+                        <TextBlock Text="1. Başlangıç:" FontWeight="SemiBold" Margin="0,5,0,5"/>
+                        <TextBlock Text="• Dakika seçimi yaparak süreyi ayarlayın" Margin="10,2"/>
+                        <TextBlock Text="• Play butonuna basarak sayacı başlatın" Margin="10,2"/>
+                        <TextBlock Text="• Pause ile duraklatabilirsiniz" Margin="10,2"/>
+                        <TextBlock Text="• Reset ile süreyi sıfırlayabilirsiniz" Margin="10,2"/>
+                        <TextBlock Text="• Odak sayaçtayken ESC pencereyi kapatır ve sayacı sıfırlar" Margin="10,2"/>
+                        
+                        <TextBlock Text="2. Sunum Sırasında:" FontWeight="SemiBold" Margin="0,10,0,5"/>
+                        <TextBlock Text="• Sayaç penceresi sürüklenebilir" Margin="10,2"/>
+                        <TextBlock Text="• Sayacı ekranın herhangi bir yerine taşıyabilirsiniz" Margin="10,2"/>
+                        <TextBlock Text="• Sayacın boyutunu değiştirebilirsiniz" Margin="10,2"/>
+                        <TextBlock Text="• Sayacı ekranlar arasında taşıyabilirsiniz" Margin="10,2"/>
+                        <TextBlock Text="• Pause ile duraklatabilirsiniz" Margin="10,2"/>
+                        <TextBlock Text="• Süre bitince negatif sayıma geçer" Margin="10,2"/>
+
+                        
+                        <TextBlock Text="3. Sistem Tepsisi:" FontWeight="SemiBold" Margin="0,10,0,5"/>
+                        <TextBlock Text="• Ctrl+Shift+T ile gizle/göster" Margin="10,2"/>
+                        <TextBlock Text="• Tepsi iconuna çift tıklayarak aç/kapat" Margin="10,2"/>
+                        <TextBlock Text="• Sağ tık ile menü erişimi" Margin="10,2"/>
+                        
+                        <TextBlock Text="4. Ayarlar:" FontWeight="SemiBold" Margin="0,10,0,5"/>
+                        <TextBlock Text="• 5 farklı tema seçeneği" Margin="10,2"/>
+                        <TextBlock Text="• Türkçe/İngilizce dil desteği (süre bitti uyarısı için)" Margin="10,2"/>
+                        <TextBlock Text="• Bildirim ayarları (5dk, 1dk uyarısı)" Margin="10,2"/>
+                    </StackPanel>
+                </GroupBox>
+
+                <!-- Features -->
+                <GroupBox Header="Özellikler" Margin="0,0,0,15" Padding="15">
+                    <StackPanel>
+                        <TextBlock Text="• Akıllı bildirim sistemi" Margin="0,2"/>
+                        <TextBlock Text="• Çoklu tema desteği" Margin="0,2"/>
+                        <TextBlock Text="• Çok dilli mesaj desteği" Margin="0,2"/>
+                        <TextBlock Text="• Global klavye kısayolları" Margin="0,2"/>
+                        <TextBlock Text="• Sistem tepsisi entegrasyonu" Margin="0,2"/>
+                        <TextBlock Text="• Negatif sayım özelliği" Margin="0,2"/>
+                        <TextBlock Text="• Her zaman üstte kalma" Margin="0,2"/>
+                        <TextBlock Text="• Sürüklenebilir arayüz" Margin="0,2"/>
+                        <TextBlock Text="• Boyutlandırılabilir pencere" Margin="0,2"/>
+                        <TextBlock Text="• Çoklu ekran desteği" Margin="0,2"/>
+                    </StackPanel>
+                </GroupBox>
+
+                <!-- Keyboard Shortcuts -->
+                <GroupBox Header="Klavye Kısayolları" Margin="0,0,0,15" Padding="15">
+                    <StackPanel>
+                        <Grid Margin="0,3">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="120"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="Pencereyi göster/gizle"/>
+                            <TextBlock Grid.Column="1" Text="Ctrl+Shift+T" FontWeight="Bold" HorizontalAlignment="Right"/>
+                        </Grid>
+                        <Grid Margin="0,3">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="120"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="Başlat/Durdur"/>
+                            <TextBlock Grid.Column="1" Text="F5" FontWeight="Bold" HorizontalAlignment="Right"/>
+                        </Grid>
+                        <Grid Margin="0,3">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="120"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="Sıfırla"/>
+                            <TextBlock Grid.Column="1" Text="F7" FontWeight="Bold" HorizontalAlignment="Right"/>
+                        </Grid>
+                        <Grid Margin="0,3">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="120"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="Kapat ve sıfırla"/>
+                            <TextBlock Grid.Column="1" Text="ESC" FontWeight="Bold" HorizontalAlignment="Right"/>
+                        </Grid>
+                    </StackPanel>
+                </GroupBox>
+
+            </StackPanel>
+        </ScrollViewer>
+
+        <!-- Bottom Button -->
+        <Grid Grid.Row="2" Margin="0,15,0,0">
+            <Button Content="Geri" 
+                    Width="80" Height="35"
+                    Background="#27AE60" Foreground="White" 
+                    FontSize="12"
+                    HorizontalAlignment="Right"
+                    Style="{StaticResource ModernButton}"
+                    Click="OkButton_Click"/>
+        </Grid>
+    </Grid>
+</Window>
