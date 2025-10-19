@@ -545,7 +545,17 @@ namespace TikTak.Windows
                     return;
                 }
                 
-                var selectedScreenIndex = ScreenComboBox.SelectedIndex;
+                // Get selected screen index from ComboBox Tag
+                var selectedScreenIndex = 0;
+                
+                if (ScreenComboBox.SelectedItem is System.Windows.Controls.ComboBoxItem selectedScreenItem)
+                {
+                    if (int.TryParse(selectedScreenItem.Tag?.ToString(), out int screenIndex))
+                    {
+                        selectedScreenIndex = screenIndex;
+                    }
+                }
+                
                 _fullscreenWindow = new FullscreenDisplayWindow(_timerModel, selectedScreenIndex);
                 
                 // Listen to exit event

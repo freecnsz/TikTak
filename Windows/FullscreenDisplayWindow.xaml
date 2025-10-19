@@ -9,6 +9,7 @@
         ShowInTaskbar="False"
         WindowState="Normal"
         ResizeMode="NoResize"
+        WindowStartupLocation="Manual"
         KeyDown="Window_KeyDown">
     
     <Grid>

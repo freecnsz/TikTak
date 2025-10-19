@@ -20,19 +20,26 @@ namespace TikTak.Windows
         public FullscreenDisplayWindow(TimerModel timerModel, int screenIndex = 0)
         {
             InitializeComponent();
+            
             _timerModel = timerModel;
             _currentScreenIndex = screenIndex;
+            
             _settingsService = new SettingsService();
             _settings = _settingsService.LoadSettings();
 
             // Subscribe to timer updates
             _timerModel.PropertyChanged += TimerModel_PropertyChanged;
 
-            // Position on correct screen after window is loaded
-            this.Loaded += (s, e) => PositionOnScreen();
-            
-            // Subscribe to location changes to detect screen changes
-            this.LocationChanged += FullscreenDisplayWindow_LocationChanged;
+            // Position on correct screen after window is shown and rendered
+            this.Loaded += (s, e) => {
+                this.Dispatcher.BeginInvoke(new Action(() => {
+                    PositionOnScreen();
+                    
+                    // CRITICAL: Subscribe to LocationChanged AFTER positioning!
+                    // Otherwise it triggers before positioning and resets _currentScreenIndex to 0
+                    this.LocationChanged += FullscreenDisplayWindow_LocationChanged;
+                }), System.Windows.Threading.DispatcherPriority.Loaded);
+            };
 
             // Setup keyboard and mouse events for input
             this.Focusable = true;
@@ -45,6 +52,7 @@ namespace TikTak.Windows
         private void PositionOnScreen()
         {
             var screens = System.Windows.Forms.Screen.AllScreens;
+            
             if (_currentScreenIndex >= 0 && _currentScreenIndex < screens.Length)
             {
                 var screen = screens[_currentScreenIndex];
@@ -53,17 +61,28 @@ namespace TikTak.Windows
                 // Get DPI scale
                 var dpiScale = GetDpiScale();
 
-                // First set to Normal state to position correctly
+                // CRITICAL: Must set these BEFORE positioning
+                this.WindowStyle = WindowStyle.None;
+                this.ResizeMode = ResizeMode.NoResize;
                 this.WindowState = WindowState.Normal;
                 
-                // Position on selected screen
-                this.Left = bounds.Left / dpiScale;
-                this.Top = bounds.Top / dpiScale;
-                this.Width = bounds.Width / dpiScale;
-                this.Height = bounds.Height / dpiScale;
+                // Calculate position and size in WPF logical units
+                var left = bounds.Left / dpiScale;
+                var top = bounds.Top / dpiScale;
+                var width = bounds.Width / dpiScale;
+                var height = bounds.Height / dpiScale;
                 
-                // Now maximize on that screen
-                this.WindowState = WindowState.Maximized;
+                // Apply position and size
+                this.Left = left;
+                this.Top = top;
+                this.Width = width;
+                this.Height = height;
+                
+                // Ensure window stays on top and in correct position
+                this.Topmost = true;
+                
+                // Force update
+                this.UpdateLayout();
             }
         }
         
