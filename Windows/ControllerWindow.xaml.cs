@@ -367,6 +367,9 @@ namespace TikTak.Windows
                     {
                         // Switch to Custom position when manually moved
                         SetPositionComboBoxToCustom();
+                        
+                        // Save custom position immediately
+                        SaveCustomPosition();
                     };
                     
                     _displayWindow.OnScreenChanged += (newScreenIndex) =>
@@ -502,8 +505,14 @@ namespace TikTak.Windows
             var settingsService = new SettingsService();
             var settings = settingsService.LoadSettings();
             
-            // Save screen
-            settings.LastScreenIndex = ScreenComboBox.SelectedIndex;
+            // Save screen - use Tag instead of SelectedIndex
+            if (ScreenComboBox.SelectedItem is System.Windows.Controls.ComboBoxItem selectedScreenItem)
+            {
+                if (int.TryParse(selectedScreenItem.Tag?.ToString(), out int screenIndex))
+                {
+                    settings.LastScreenIndex = screenIndex;
+                }
+            }
             
             // Save position
             if (PositionComboBox.SelectedItem is System.Windows.Controls.ComboBoxItem selectedItem)
@@ -520,6 +529,63 @@ namespace TikTak.Windows
                     settings.LastPosition = position;
                 }
             }
+            
+            settingsService.SaveSettings(settings);
+        }
+        
+        private void SaveCurrentScreenSelection()
+        {
+            var settingsService = new SettingsService();
+            var settings = settingsService.LoadSettings();
+            
+            // Save screen selection
+            if (ScreenComboBox.SelectedItem is System.Windows.Controls.ComboBoxItem selectedScreenItem)
+            {
+                if (int.TryParse(selectedScreenItem.Tag?.ToString(), out int screenIndex))
+                {
+                    settings.LastScreenIndex = screenIndex;
+                    settingsService.SaveSettings(settings);
+                }
+            }
+        }
+        
+        private void SaveCurrentPositionSelection()
+        {
+            var settingsService = new SettingsService();
+            var settings = settingsService.LoadSettings();
+            
+            // Save position selection
+            if (PositionComboBox.SelectedItem is System.Windows.Controls.ComboBoxItem selectedItem)
+            {
+                var position = selectedItem.Tag?.ToString();
+                if (!string.IsNullOrEmpty(position))
+                {
+                    settings.LastPosition = position;
+                    
+                    // If switching away from Custom, clear custom coordinates
+                    if (position != "Custom")
+                    {
+                        settings.LastCustomLeft = 0;
+                        settings.LastCustomTop = 0;
+                    }
+                    
+                    settingsService.SaveSettings(settings);
+                }
+            }
+        }
+        
+        private void SaveCustomPosition()
+        {
+            if (_displayWindow == null || !_displayWindow.IsLoaded)
+                return;
+                
+            var settingsService = new SettingsService();
+            var settings = settingsService.LoadSettings();
+            
+            // Save custom position coordinates
+            settings.LastPosition = "Custom";
+            settings.LastCustomLeft = _displayWindow.Left;
+            settings.LastCustomTop = _displayWindow.Top;
             
             settingsService.SaveSettings(settings);
         }
@@ -679,6 +745,9 @@ namespace TikTak.Windows
 
         private void PositionComboBox_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
         {
+            // Save position selection immediately
+            SaveCurrentPositionSelection();
+            
             if (_displayWindow != null && _displayWindow.IsLoaded && PositionComboBox.SelectedItem is System.Windows.Controls.ComboBoxItem selectedItem)
             {
                 var position = selectedItem.Tag?.ToString();
@@ -710,6 +779,17 @@ namespace TikTak.Windows
             // Auto-detect system screens
             var screens = System.Windows.Forms.Screen.AllScreens;
             
+            // Load saved screen index from settings
+            var settingsService = new SettingsService();
+            var settings = settingsService.LoadSettings();
+            int savedScreenIndex = settings.LastScreenIndex;
+            
+            // Validate saved screen index
+            if (savedScreenIndex < 0 || savedScreenIndex >= screens.Length)
+            {
+                savedScreenIndex = 0; // Default to primary screen if invalid
+            }
+            
             for (int i = 0; i < screens.Length; i++)
             {
                 var screen = screens[i];
@@ -731,8 +811,8 @@ namespace TikTak.Windows
                     Tag = i.ToString() // Store screen index as tag
                 };
                 
-                // Select first screen (usually primary) as default
-                if (i == 0)
+                // Select saved screen or default to first screen
+                if (i == savedScreenIndex)
                 {
                     item.IsSelected = true;
                 }
@@ -884,6 +964,9 @@ namespace TikTak.Windows
 
         private void ScreenComboBox_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
         {
+            // Save screen selection immediately
+            SaveCurrentScreenSelection();
+            
             // Reposition DisplayWindow when screen selection changes
             if (_displayWindow != null && _displayWindow.IsLoaded && ScreenComboBox.SelectedItem is System.Windows.Controls.ComboBoxItem selectedItem)
             {
