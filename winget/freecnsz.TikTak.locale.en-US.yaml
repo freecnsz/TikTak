@@ -1,6 +1,6 @@
 # Created with YamlCreate.ps1 v2.4.1
 PackageIdentifier: freecnsz.TikTak
-PackageVersion: 1.0.0
+PackageVersion: 1.1.0
 PackageLocale: en-US
 Publisher: freecnsz
 PublisherUrl: https://github.com/freecnsz
@@ -15,7 +15,8 @@ CopyrightUrl: https://github.com/freecnsz/TikTak/blob/master/LICENSE
 ShortDescription: Professional presentation countdown timer for conferences and events
 Description: |-
   TikTak is a professional countdown timer designed specifically for presentations, conferences, and events.
-  Features include customizable timer settings, system tray integration, and a clean professional interface.
+  Features include customizable timer settings, multi-screen support, position persistence, fullscreen mode,
+  WASD keyboard positioning, system tray integration, and a clean professional interface.
 Moniker: tiktak
 Tags:
 - timer
@@ -24,13 +25,17 @@ Tags:
 - conference
 - events
 - productivity
+- multi-monitor
+- fullscreen
 ReleaseNotes: |-
-  Initial release of TikTak
-  - Professional countdown timer
-  - System tray integration
-  - Customizable settings
-  - Clean interface
-ReleaseNotesUrl: https://github.com/freecnsz/TikTak/releases/tag/v1.0.0
+  Version 1.1.0
+  - Position persistence: Timer position and screen selection now saved and restored
+  - Fullscreen and small timer synced across screens via Win+Shift+Arrow
+  - Fixed negative countdown display in fullscreen (centered minus sign)
+  - Prevented dropdown value changes on scroll in settings
+  - Updated About window with new features
+  - Default button now resets screen and position settings
+ReleaseNotesUrl: https://github.com/freecnsz/TikTak/releases/tag/v1.1.0
 PurchaseUrl: https://github.com/freecnsz/TikTak
 InstallationNotes: No additional setup required after installation
 Documentations:

@@ -47,9 +47,9 @@
     <AssemblyCompany>freecnsz</AssemblyCompany>
     <AssemblyProduct>TikTak</AssemblyProduct>
     <AssemblyCopyright>Copyright © 2025 freecnsz</AssemblyCopyright>
-    <AssemblyVersion>1.0.0.0</AssemblyVersion>
-    <FileVersion>1.0.0.0</FileVersion>
-    <ProductVersion>1.0.0</ProductVersion>
+    <AssemblyVersion>1.1.0.0</AssemblyVersion>
+    <FileVersion>1.1.0.0</FileVersion>
+    <ProductVersion>1.1.0</ProductVersion>
     <Authors>freecnsz</Authors>
     
     <!-- Additional Properties -->
