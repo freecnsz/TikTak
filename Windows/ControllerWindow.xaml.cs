@@ -14,6 +14,7 @@ namespace TikTak.Windows
         private readonly TimerModel _timerModel;
         private readonly TimerService _timerService;
         private DisplayWindow? _displayWindow;
+        private FullscreenDisplayWindow? _fullscreenWindow;
         private NotifyIcon? _notifyIcon;
         
         // Windows API for global hotkey
@@ -327,6 +328,47 @@ namespace TikTak.Windows
             }
         }
 
+        private void FullscreenButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (_fullscreenWindow != null && _fullscreenWindow.IsLoaded)
+            {
+                // Close fullscreen window
+                _fullscreenWindow.Close();
+                _fullscreenWindow = null;
+                
+                FullscreenButton.Content = "⛶ Tam Ekran";
+                FullscreenButton.Background = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(155, 89, 182)); // Purple
+                StatusText.Text = "Tam ekrandan çıkıldı";
+            }
+            else
+            {
+                // Open fullscreen window
+                if (_displayWindow == null || !_displayWindow.IsLoaded)
+                {
+                    StatusText.Text = "Önce sayacı göstermelisiniz";
+                    return;
+                }
+                
+                var selectedScreenIndex = ScreenComboBox.SelectedIndex;
+                _fullscreenWindow = new FullscreenDisplayWindow(_timerModel, selectedScreenIndex);
+                
+                // Listen to exit event
+                _fullscreenWindow.OnExitFullscreen += () =>
+                {
+                    FullscreenButton.Content = "⛶ Tam Ekran";
+                    FullscreenButton.Background = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(155, 89, 182));
+                    StatusText.Text = "Tam ekrandan çıkıldı";
+                    _fullscreenWindow = null;
+                };
+                
+                _fullscreenWindow.Show();
+                
+                FullscreenButton.Content = "⛶ Normal";
+                FullscreenButton.Background = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(231, 76, 60)); // Red
+                StatusText.Text = "Tam ekran modunda";
+            }
+        }
+
         private void ResetPlayPauseButton()
         {
             PlayPauseButton.Content = "▶";
@@ -342,19 +384,45 @@ namespace TikTak.Windows
                 _timerService.Stop();
                 _timerService.Reset();
                 
+                // Close fullscreen if open
+                if (_fullscreenWindow != null)
+                {
+                    _fullscreenWindow.Close();
+                    _fullscreenWindow = null;
+                }
+                
                 if (_displayWindow != null)
                 {
                     _displayWindow.Close();
                     _displayWindow = null;
                 }
                 
+                // Reset fullscreen button
+                FullscreenButton.Content = "⛶ Tam Ekran";
+                FullscreenButton.Background = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(155, 89, 182));
+                
                 ResetPlayPauseButton();
                 StatusText.Text = "Sayaç durduruldu ve sıfırlandı";
             }
-            else if (_displayWindow != null)
+            else if (_displayWindow != null || _fullscreenWindow != null)
             {
-                _displayWindow.Close();
-                _displayWindow = null;
+                // Close fullscreen if open
+                if (_fullscreenWindow != null)
+                {
+                    _fullscreenWindow.Close();
+                    _fullscreenWindow = null;
+                }
+                
+                if (_displayWindow != null)
+                {
+                    _displayWindow.Close();
+                    _displayWindow = null;
+                }
+                
+                // Reset fullscreen button
+                FullscreenButton.Content = "⛶ Tam Ekran";
+                FullscreenButton.Background = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(155, 89, 182));
+                
                 StatusText.Text = "Görüntü penceresi kapatıldı";
             }
             else
@@ -550,7 +618,7 @@ namespace TikTak.Windows
 
         private void SettingsButton_Click(object sender, RoutedEventArgs e)
         {
-            var settingsWindow = new SettingsWindow(_timerService, _displayWindow);
+            var settingsWindow = new SettingsWindow(_timerService, _displayWindow, _fullscreenWindow);
             settingsWindow.Owner = this;
             settingsWindow.ShowDialog();
         }
@@ -634,7 +702,7 @@ namespace TikTak.Windows
             
             var settingsItem = new ToolStripMenuItem("Ayarlar");
             settingsItem.Click += (s, e) => {
-                var settingsWindow = new SettingsWindow(_timerService, _displayWindow);
+                var settingsWindow = new SettingsWindow(_timerService, _displayWindow, _fullscreenWindow);
                 settingsWindow.Owner = this;
                 settingsWindow.ShowDialog();
             };

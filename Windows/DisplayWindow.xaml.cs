@@ -367,7 +367,7 @@ namespace TikTak.Windows
         {
             if (e.Key == Key.Escape)
             {
-                // ESC closes and resets timer (like Exit button)
+                // ESC closes and resets timer
                 ResetAndCloseTimer();
                 e.Handled = true;
                 return;

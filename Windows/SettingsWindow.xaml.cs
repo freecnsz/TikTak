@@ -11,15 +11,17 @@ namespace TikTak.Windows
         private readonly SettingsService _settingsService;
         private readonly TimerService? _timerService;
         private DisplayWindow? _displayWindow;
+        private FullscreenDisplayWindow? _fullscreenWindow;
         private AppSettings? _settings;
         private AppSettings? _originalSettings;
 
-        public SettingsWindow(TimerService? timerService = null, DisplayWindow? displayWindow = null)
+        public SettingsWindow(TimerService? timerService = null, DisplayWindow? displayWindow = null, FullscreenDisplayWindow? fullscreenWindow = null)
         {
             InitializeComponent();
             _settingsService = new SettingsService();
             _timerService = timerService;
             _displayWindow = displayWindow;
+            _fullscreenWindow = fullscreenWindow;
             Loaded += SettingsWindow_Loaded;
         }
 
@@ -252,9 +254,17 @@ namespace TikTak.Windows
 
         private void CancelButton_Click(object sender, RoutedEventArgs e)
         {
-            if (_originalSettings != null && _displayWindow != null)
+            if (_originalSettings != null)
             {
-                _displayWindow.ApplySettings(_originalSettings);
+                if (_displayWindow != null)
+                {
+                    _displayWindow.ApplySettings(_originalSettings);
+                }
+                
+                if (_fullscreenWindow != null)
+                {
+                    _fullscreenWindow.ApplySettings(_originalSettings);
+                }
             }
             this.Close();
         }
@@ -274,6 +284,11 @@ namespace TikTak.Windows
             if (_displayWindow != null)
             {
                 _displayWindow.ApplySettings(_settings);
+            }
+            
+            if (_fullscreenWindow != null)
+            {
+                _fullscreenWindow.ApplySettings(_settings);
             }
         }
 
