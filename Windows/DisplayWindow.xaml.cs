@@ -15,6 +15,12 @@ namespace TikTak.Windows
         private AppSettings _settings;
         private string _currentPosition = "TopLeft";
 
+        // Event when window is manually moved
+        public event Action? OnPositionManuallyChanged;
+        
+        // Event when window moved to different screen
+        public event Action<int>? OnScreenChanged;
+
         public DisplayWindow(TimerModel timerModel, int screenIndex = 0, string title = "TikTak Sayaç")
         {
             InitializeComponent();
@@ -41,6 +47,33 @@ namespace TikTak.Windows
             this.Focusable = true;
             this.KeyDown += DisplayWindow_KeyDown;
             this.MouseLeftButtonDown += DisplayWindow_MouseLeftButtonDown;
+            
+            // Monitor screen changes
+            this.LocationChanged += DisplayWindow_LocationChanged;
+        }
+        
+        private void DisplayWindow_LocationChanged(object? sender, EventArgs e)
+        {
+            // Detect which screen the window is currently on
+            var screens = System.Windows.Forms.Screen.AllScreens;
+            for (int i = 0; i < screens.Length; i++)
+            {
+                var screen = screens[i];
+                var dpiScale = GetDpiScale();
+                
+                var windowCenterX = (this.Left + this.ActualWidth / 2) * dpiScale;
+                var windowCenterY = (this.Top + this.ActualHeight / 2) * dpiScale;
+                
+                if (screen.Bounds.Contains((int)windowCenterX, (int)windowCenterY))
+                {
+                    if (i != _currentScreenIndex)
+                    {
+                        _currentScreenIndex = i;
+                        OnScreenChanged?.Invoke(i);
+                    }
+                    break;
+                }
+            }
         }
 
         private void ApplySettings()
@@ -223,37 +256,78 @@ namespace TikTak.Windows
 
         public void SetScreen(int screenIndex)
         {
-            _currentScreenIndex = screenIndex;
+            // Store old screen info to calculate relative position
+            var oldScreenIndex = _currentScreenIndex;
             var screens = System.Windows.Forms.Screen.AllScreens;
             
-            if (screenIndex >= 0 && screenIndex < screens.Length)
+            if (oldScreenIndex >= 0 && oldScreenIndex < screens.Length)
             {
-                var screen = screens[screenIndex];
-                var workingArea = screen.WorkingArea;
-                
-                // Get DPI scale factor
+                var oldScreen = screens[oldScreenIndex];
+                var oldWorkingArea = oldScreen.WorkingArea;
                 var dpiScale = GetDpiScale();
                 
-                // Use default values if window size not yet determined
                 var windowWidth = ActualWidth > 0 ? ActualWidth : 130;
                 var windowHeight = ActualHeight > 0 ? ActualHeight : 45;
                 
-                // Convert physical screen coordinates to WPF logical units
-                var scaledLeft = workingArea.Left / dpiScale;
-                var scaledTop = workingArea.Top / dpiScale;
-                var scaledWidth = workingArea.Width / dpiScale;
-                var scaledHeight = workingArea.Height / dpiScale;
+                // Calculate old screen dimensions in WPF units
+                var oldScaledLeft = oldWorkingArea.Left / dpiScale;
+                var oldScaledTop = oldWorkingArea.Top / dpiScale;
+                var oldScaledWidth = oldWorkingArea.Width / dpiScale;
+                var oldScaledHeight = oldWorkingArea.Height / dpiScale;
                 
-                // Center of screen
-                Left = scaledLeft + (scaledWidth - windowWidth) / 2;
-                Top = scaledTop + (scaledHeight - windowHeight) / 2;
+                // Calculate relative position (0.0 to 1.0) on old screen
+                var relativeX = (Left - oldScaledLeft) / oldScaledWidth;
+                var relativeY = (Top - oldScaledTop) / oldScaledHeight;
                 
-                // Fix position if outside screen bounds
-                var safeMargin = 20 / dpiScale;
-                if (Left < scaledLeft) Left = scaledLeft + safeMargin;
-                if (Top < scaledTop) Top = scaledTop + safeMargin;
-                if (Left + windowWidth > scaledLeft + scaledWidth) Left = scaledLeft + scaledWidth - windowWidth - safeMargin;
-                if (Top + windowHeight > scaledTop + scaledHeight) Top = scaledTop + scaledHeight - windowHeight - safeMargin;
+                // Update screen index
+                _currentScreenIndex = screenIndex;
+                
+                // Apply same relative position to new screen
+                if (screenIndex >= 0 && screenIndex < screens.Length)
+                {
+                    var newScreen = screens[screenIndex];
+                    var newWorkingArea = newScreen.WorkingArea;
+                    
+                    var newScaledLeft = newWorkingArea.Left / dpiScale;
+                    var newScaledTop = newWorkingArea.Top / dpiScale;
+                    var newScaledWidth = newWorkingArea.Width / dpiScale;
+                    var newScaledHeight = newWorkingArea.Height / dpiScale;
+                    
+                    // Apply relative position to new screen
+                    Left = newScaledLeft + (relativeX * newScaledWidth);
+                    Top = newScaledTop + (relativeY * newScaledHeight);
+                    
+                    // Fix position if outside screen bounds
+                    var safeMargin = 20 / dpiScale;
+                    if (Left < newScaledLeft) Left = newScaledLeft + safeMargin;
+                    if (Top < newScaledTop) Top = newScaledTop + safeMargin;
+                    if (Left + windowWidth > newScaledLeft + newScaledWidth) Left = newScaledLeft + newScaledWidth - windowWidth - safeMargin;
+                    if (Top + windowHeight > newScaledTop + newScaledHeight) Top = newScaledTop + newScaledHeight - windowHeight - safeMargin;
+                }
+            }
+            else
+            {
+                // First time setting screen, just center it
+                _currentScreenIndex = screenIndex;
+                
+                if (screenIndex >= 0 && screenIndex < screens.Length)
+                {
+                    var screen = screens[screenIndex];
+                    var workingArea = screen.WorkingArea;
+                    var dpiScale = GetDpiScale();
+                    
+                    var windowWidth = ActualWidth > 0 ? ActualWidth : 130;
+                    var windowHeight = ActualHeight > 0 ? ActualHeight : 45;
+                    
+                    var scaledLeft = workingArea.Left / dpiScale;
+                    var scaledTop = workingArea.Top / dpiScale;
+                    var scaledWidth = workingArea.Width / dpiScale;
+                    var scaledHeight = workingArea.Height / dpiScale;
+                    
+                    // Center of screen
+                    Left = scaledLeft + (scaledWidth - windowWidth) / 2;
+                    Top = scaledTop + (scaledHeight - windowHeight) / 2;
+                }
             }
         }
 
@@ -332,6 +406,7 @@ namespace TikTak.Windows
         {
             return _settings.DisplayMargin switch
             {
+                "None" => 0,
                 "Close" => 10,
                 "Normal" => 20,
                 "Far" => 40,
@@ -356,15 +431,65 @@ namespace TikTak.Windows
             _inputBuffer = "";
             this.Focus();
             
-            // Drag window
+            // Drag window and check if position actually changed
             if (e.ButtonState == MouseButtonState.Pressed)
             {
+                var oldLeft = this.Left;
+                var oldTop = this.Top;
+                
                 this.DragMove();
+                
+                // Only notify if position actually changed (was dragged, not just clicked)
+                if (Math.Abs(this.Left - oldLeft) > 1 || Math.Abs(this.Top - oldTop) > 1)
+                {
+                    _currentPosition = "Custom";
+                    OnPositionManuallyChanged?.Invoke();
+                }
             }
         }
 
         private void DisplayWindow_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
         {
+            // WASD keys for directional snapping based on current pixel position
+            if (e.Key == Key.W || e.Key == Key.A || e.Key == Key.S || e.Key == Key.D)
+            {
+                var screens = System.Windows.Forms.Screen.AllScreens;
+                if (_currentScreenIndex >= 0 && _currentScreenIndex < screens.Length)
+                {
+                    var screen = screens[_currentScreenIndex];
+                    var workingArea = screen.WorkingArea;
+                    var dpiScale = GetDpiScale();
+                    
+                    var windowWidth = ActualWidth > 0 ? ActualWidth : 130;
+                    var windowHeight = ActualHeight > 0 ? ActualHeight : 45;
+                    int margin = GetMarginPixels();
+                    
+                    var scaledLeft = workingArea.Left / dpiScale;
+                    var scaledTop = workingArea.Top / dpiScale;
+                    var scaledWidth = workingArea.Width / dpiScale;
+                    var scaledHeight = workingArea.Height / dpiScale;
+                    var scaledMargin = margin / dpiScale;
+                    
+                    switch (e.Key)
+                    {
+                        case Key.W: // Snap to Top (keep X position)
+                            Top = scaledTop + scaledMargin;
+                            break;
+                        case Key.A: // Snap to Left (keep Y position)
+                            Left = scaledLeft + scaledMargin;
+                            break;
+                        case Key.S: // Snap to Bottom (keep X position)
+                            Top = scaledTop + scaledHeight - windowHeight - scaledMargin;
+                            break;
+                        case Key.D: // Snap to Right (keep Y position)
+                            Left = scaledLeft + scaledWidth - windowWidth - scaledMargin;
+                            break;
+                    }
+                }
+                e.Handled = true;
+                return;
+            }
+            
             if (e.Key == Key.Escape)
             {
                 // ESC closes and resets timer
@@ -376,12 +501,15 @@ namespace TikTak.Windows
             if (e.Key == Key.Enter && !string.IsNullOrEmpty(_inputBuffer))
             {
                 // Enter sets minute value and starts timer
-                if (int.TryParse(_inputBuffer, out int minutes) && minutes > 0)
+                if (int.TryParse(_inputBuffer, out int minutes))
                 {
-                    SetTimerMinutes(minutes);
+                    if (minutes >= 1 && minutes <= 999)
+                    {
+                        SetTimerMinutes(minutes);
+                    }
+                    // Silently ignore invalid values (out of range)
                 }
                 
-
                 _inputBuffer = "";
                 e.Handled = true;
                 return;
@@ -437,8 +565,28 @@ namespace TikTak.Windows
 
         protected override void OnClosed(EventArgs e)
         {
+            // Save position before closing
+            SavePosition();
+            
             _timerModel.PropertyChanged -= TimerModel_PropertyChanged;
             base.OnClosed(e);
+        }
+        
+        private void SavePosition()
+        {
+            var settingsService = new SettingsService();
+            var settings = settingsService.LoadSettings();
+            
+            settings.LastScreenIndex = _currentScreenIndex;
+            settings.LastPosition = _currentPosition;
+            
+            if (_currentPosition == "Custom")
+            {
+                settings.LastCustomLeft = this.Left;
+                settings.LastCustomTop = this.Top;
+            }
+            
+            settingsService.SaveSettings(settings);
         }
 
         protected override void OnActivated(EventArgs e)

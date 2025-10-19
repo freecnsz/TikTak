@@ -82,29 +82,36 @@
                 <GroupBox Header="Nasıl Kullanılır" Margin="0,0,0,15" Padding="15">
                     <StackPanel>
                         <TextBlock Text="1. Başlangıç:" FontWeight="SemiBold" Margin="0,5,0,5"/>
-                        <TextBlock Text="• Dakika seçimi yaparak süreyi ayarlayın" Margin="10,2"/>
+                        <TextBlock Text="• Dakika girerek veya seçerek süreyi ayarlayın (1-999 dk)" Margin="10,2"/>
+                        <TextBlock Text="• ±1, ±5 butonları ile hızlı ayarlama yapabilirsiniz" Margin="10,2"/>
+                        <TextBlock Text="• 0 butonu ile sayacı sıfırlayabilirsiniz" Margin="10,2"/>
                         <TextBlock Text="• Play butonuna basarak sayacı başlatın" Margin="10,2"/>
                         <TextBlock Text="• Pause ile duraklatabilirsiniz" Margin="10,2"/>
-                        <TextBlock Text="• Reset ile süreyi sıfırlayabilirsiniz" Margin="10,2"/>
-                        <TextBlock Text="• Odak sayaçtayken ESC pencereyi kapatır ve sayacı sıfırlar" Margin="10,2"/>
                         
-                        <TextBlock Text="2. Sunum Sırasında:" FontWeight="SemiBold" Margin="0,10,0,5"/>
-                        <TextBlock Text="• Sayaç penceresi sürüklenebilir" Margin="10,2"/>
-                        <TextBlock Text="• Sayacı ekranın herhangi bir yerine taşıyabilirsiniz" Margin="10,2"/>
-                        <TextBlock Text="• Sayacın boyutunu değiştirebilirsiniz" Margin="10,2"/>
-                        <TextBlock Text="• Sayacı ekranlar arasında taşıyabilirsiniz" Margin="10,2"/>
-                        <TextBlock Text="• Pause ile duraklatabilirsiniz" Margin="10,2"/>
-                        <TextBlock Text="• Süre bitince negatif sayıma geçer" Margin="10,2"/>
-
+                        <TextBlock Text="2. Sayaç Pozisyonlama:" FontWeight="SemiBold" Margin="0,10,0,5"/>
+                        <TextBlock Text="• Ekran ve pozisyon seçerek yerleştirin" Margin="10,2"/>
+                        <TextBlock Text="• Sayacı sürükleyerek özel konuma taşıyın" Margin="10,2"/>
+                        <TextBlock Text="• W/A/S/D tuşları ile hızlı konumlandırma:" Margin="10,2"/>
+                        <TextBlock Text="   W = Üste, A = Sola, S = Alta, D = Sağa yapıştır" Margin="20,2"/>
+                        <TextBlock Text="• Kenar uzaklığı ayarları ile hassas yerleştirme" Margin="10,2"/>
+                        <TextBlock Text="• Ekranlar arası taşımada pozisyon korunur" Margin="10,2"/>
                         
-                        <TextBlock Text="3. Sistem Tepsisi:" FontWeight="SemiBold" Margin="0,10,0,5"/>
+                        <TextBlock Text="3. Tam Ekran Modu:" FontWeight="SemiBold" Margin="0,10,0,5"/>
+                        <TextBlock Text="• Tam Ekran butonuyla büyük ekran görünümü" Margin="10,2"/>
+                        <TextBlock Text="• Tam ekranda sayı tuşları ile dakika girebilirsiniz" Margin="10,2"/>
+                        <TextBlock Text="• Enter ile yeni süreyi başlatın" Margin="10,2"/>
+                        <TextBlock Text="• ESC ile tam ekrandan çıkın" Margin="10,2"/>
+                        
+                        <TextBlock Text="4. Sistem Tepsisi:" FontWeight="SemiBold" Margin="0,10,0,5"/>
                         <TextBlock Text="• Ctrl+Shift+T ile gizle/göster" Margin="10,2"/>
                         <TextBlock Text="• Tepsi iconuna çift tıklayarak aç/kapat" Margin="10,2"/>
                         <TextBlock Text="• Sağ tık ile menü erişimi" Margin="10,2"/>
                         
-                        <TextBlock Text="4. Ayarlar:" FontWeight="SemiBold" Margin="0,10,0,5"/>
+                        <TextBlock Text="5. Ayarlar:" FontWeight="SemiBold" Margin="0,10,0,5"/>
                         <TextBlock Text="• 5 farklı tema seçeneği" Margin="10,2"/>
-                        <TextBlock Text="• Türkçe/İngilizce dil desteği (süre bitti uyarısı için)" Margin="10,2"/>
+                        <TextBlock Text="• Türkçe/İngilizce dil desteği" Margin="10,2"/>
+                        <TextBlock Text="• 3 boyut seçeneği (Küçük, Orta, Büyük)" Margin="10,2"/>
+                        <TextBlock Text="• 4 kenar uzaklığı seçeneği (Yok, Yakın, Normal, Uzak)" Margin="10,2"/>
                         <TextBlock Text="• Bildirim ayarları (5dk, 1dk uyarısı)" Margin="10,2"/>
                     </StackPanel>
                 </GroupBox>
@@ -112,16 +119,24 @@
                 <!-- Features -->
                 <GroupBox Header="Özellikler" Margin="0,0,0,15" Padding="15">
                     <StackPanel>
-                        <TextBlock Text="• Akıllı bildirim sistemi" Margin="0,2"/>
-                        <TextBlock Text="• Çoklu tema desteği" Margin="0,2"/>
-                        <TextBlock Text="• Çok dilli mesaj desteği" Margin="0,2"/>
+                        <TextBlock Text="• Tam ekran sunum modu" Margin="0,2"/>
+                        <TextBlock Text="• Özel konum ve akıllı pozisyonlama" Margin="0,2"/>
+                        <TextBlock Text="• WASD klavye ile hızlı konumlandırma" Margin="0,2"/>
+                        <TextBlock Text="• Çoklu ekran desteği ve pozisyon koruma" Margin="0,2"/>
+                        <TextBlock Text="• Ekran değişimi otomatik algılama" Margin="0,2"/>
+                        <TextBlock Text="• 1-999 dakika arası esnek süre ayarı" Margin="0,2"/>
+                        <TextBlock Text="• Hızlı süre ayarlama butonları (±1, ±5, 0)" Margin="0,2"/>
+                        <TextBlock Text="• 5 farklı tema seçeneği" Margin="0,2"/>
+                        <TextBlock Text="• 3 boyut seçeneği (Küçük/Orta/Büyük)" Margin="0,2"/>
+                        <TextBlock Text="• 4 kenar uzaklığı seçeneği" Margin="0,2"/>
+                        <TextBlock Text="• Akıllı bildirim sistemi (5dk, 1dk uyarısı)" Margin="0,2"/>
+                        <TextBlock Text="• Çok dilli mesaj desteği (TR/EN)" Margin="0,2"/>
                         <TextBlock Text="• Global klavye kısayolları" Margin="0,2"/>
                         <TextBlock Text="• Sistem tepsisi entegrasyonu" Margin="0,2"/>
                         <TextBlock Text="• Negatif sayım özelliği" Margin="0,2"/>
+                        <TextBlock Text="• Şeffaf ve sürüklenebilir arayüz" Margin="0,2"/>
                         <TextBlock Text="• Her zaman üstte kalma" Margin="0,2"/>
-                        <TextBlock Text="• Sürüklenebilir arayüz" Margin="0,2"/>
-                        <TextBlock Text="• Boyutlandırılabilir pencere" Margin="0,2"/>
-                        <TextBlock Text="• Çoklu ekran desteği" Margin="0,2"/>
+                        <TextBlock Text="• DPI ölçekleme desteği" Margin="0,2"/>
                     </StackPanel>
                 </GroupBox>
 
@@ -157,7 +172,15 @@
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="120"/>
                             </Grid.ColumnDefinitions>
-                            <TextBlock Grid.Column="0" Text="Kapat ve sıfırla"/>
+                            <TextBlock Grid.Column="0" Text="Sayaç pozisyonu (Üst/Sol/Alt/Sağ)"/>
+                            <TextBlock Grid.Column="1" Text="W/A/S/D" FontWeight="Bold" HorizontalAlignment="Right"/>
+                        </Grid>
+                        <Grid Margin="0,3">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="120"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="Tam ekrandan çık"/>
                             <TextBlock Grid.Column="1" Text="ESC" FontWeight="Bold" HorizontalAlignment="Right"/>
                         </Grid>
                     </StackPanel>

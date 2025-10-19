@@ -12,15 +12,16 @@ namespace TikTak.Windows
     public partial class FullscreenDisplayWindow : Window
     {
         private readonly TimerModel _timerModel;
-        private readonly int _screenIndex;
+        private int _currentScreenIndex;
         private readonly SettingsService _settingsService;
         private AppSettings _settings;
+        private string _inputBuffer = "";
 
         public FullscreenDisplayWindow(TimerModel timerModel, int screenIndex = 0)
         {
             InitializeComponent();
             _timerModel = timerModel;
-            _screenIndex = screenIndex;
+            _currentScreenIndex = screenIndex;
             _settingsService = new SettingsService();
             _settings = _settingsService.LoadSettings();
 
@@ -29,6 +30,13 @@ namespace TikTak.Windows
 
             // Position on correct screen after window is loaded
             this.Loaded += (s, e) => PositionOnScreen();
+            
+            // Subscribe to location changes to detect screen changes
+            this.LocationChanged += FullscreenDisplayWindow_LocationChanged;
+
+            // Setup keyboard and mouse events for input
+            this.Focusable = true;
+            this.MouseLeftButtonDown += Window_MouseLeftButtonDown;
 
             // Show initial value
             UpdateDisplay();
@@ -37,9 +45,9 @@ namespace TikTak.Windows
         private void PositionOnScreen()
         {
             var screens = System.Windows.Forms.Screen.AllScreens;
-            if (_screenIndex >= 0 && _screenIndex < screens.Length)
+            if (_currentScreenIndex >= 0 && _currentScreenIndex < screens.Length)
             {
-                var screen = screens[_screenIndex];
+                var screen = screens[_currentScreenIndex];
                 var bounds = screen.Bounds;
 
                 // Get DPI scale
@@ -56,6 +64,33 @@ namespace TikTak.Windows
                 
                 // Now maximize on that screen
                 this.WindowState = WindowState.Maximized;
+            }
+        }
+        
+        private void FullscreenDisplayWindow_LocationChanged(object? sender, EventArgs e)
+        {
+            // Detect screen changes when window is moved (e.g., via Win+Shift+Arrow)
+            var screens = System.Windows.Forms.Screen.AllScreens;
+            var dpiScale = GetDpiScale();
+            
+            for (int i = 0; i < screens.Length; i++)
+            {
+                var screen = screens[i];
+                
+                // Calculate window center in physical pixels
+                var windowCenterX = (this.Left + this.ActualWidth / 2) * dpiScale;
+                var windowCenterY = (this.Top + this.ActualHeight / 2) * dpiScale;
+                
+                // Check if window center is on this screen
+                if (screen.Bounds.Contains((int)windowCenterX, (int)windowCenterY))
+                {
+                    if (i != _currentScreenIndex)
+                    {
+                        _currentScreenIndex = i;
+                        OnScreenChanged?.Invoke(i);
+                        break;
+                    }
+                }
             }
         }
 
@@ -89,6 +124,7 @@ namespace TikTak.Windows
                 
                 // Use warning colors
                 TimeDisplay.Foreground = new SolidColorBrush(warningColor);
+                MinusSign.Foreground = new SolidColorBrush(warningColor);
                 MainBorder.BorderBrush = new SolidColorBrush(warningColor);
                 MainBorder.Background = new SolidColorBrush(bgColor);
                 
@@ -98,10 +134,22 @@ namespace TikTak.Windows
                 
                 if (cyclePosition < 3)
                 {
-                    TimeDisplay.Text = _timerModel.DisplayTime;
+                    // Show time without minus sign in the text (we'll show it separately)
+                    var displayText = _timerModel.DisplayTime;
+                    if (displayText.StartsWith("-"))
+                    {
+                        displayText = displayText.Substring(1); // Remove minus from text
+                        MinusSign.Visibility = Visibility.Visible;
+                    }
+                    else
+                    {
+                        MinusSign.Visibility = Visibility.Collapsed;
+                    }
+                    TimeDisplay.Text = displayText;
                 }
                 else
                 {
+                    MinusSign.Visibility = Visibility.Collapsed;
                     TimeDisplay.Text = LanguageManager.GetTimeUpMessage(_settings.Language);
                 }
                 
@@ -118,6 +166,7 @@ namespace TikTak.Windows
             }
             else // Normal time - Progressive warnings
             {
+                MinusSign.Visibility = Visibility.Collapsed;
                 TimeDisplay.Text = _timerModel.DisplayTime;
                 
                 // Stop any animations
@@ -175,20 +224,92 @@ namespace TikTak.Windows
         {
             if (e.Key == Key.Escape)
             {
+                // Clear input buffer if typing, otherwise close
+                if (!string.IsNullOrEmpty(_inputBuffer))
+                {
+                    _inputBuffer = "";
+                    e.Handled = true;
+                    return;
+                }
+                
                 // ESC closes fullscreen window
                 OnExitFullscreen?.Invoke();
                 this.Close();
                 e.Handled = true;
+                return;
             }
+
+            if (e.Key == Key.Enter && !string.IsNullOrEmpty(_inputBuffer))
+            {
+                // Enter sets minute value and starts timer (validate 1-999)
+                if (int.TryParse(_inputBuffer, out int minutes))
+                {
+                    if (minutes >= 1 && minutes <= 999)
+                    {
+                        SetTimerMinutes(minutes);
+                    }
+                    // Silently ignore invalid values (out of range)
+                }
+                _inputBuffer = "";
+                e.Handled = true;
+                return;
+            }
+
+            // Accept only numbers (for minute input)
+            if ((e.Key >= Key.D0 && e.Key <= Key.D9) || 
+                (e.Key >= Key.NumPad0 && e.Key <= Key.NumPad9))
+            {
+                string digit = "";
+                if (e.Key >= Key.D0 && e.Key <= Key.D9)
+                    digit = ((int)(e.Key - Key.D0)).ToString();
+                else if (e.Key >= Key.NumPad0 && e.Key <= Key.NumPad9)
+                    digit = ((int)(e.Key - Key.NumPad0)).ToString();
+
+                _inputBuffer += digit;
+                
+                // Show input buffer temporarily (optional)
+                // Could add visual feedback here
+                
+                e.Handled = true;
+            }
+            else if (e.Key == Key.Back || e.Key == Key.Delete)
+            {
+                // Backspace deletes last digit
+                if (_inputBuffer.Length > 0)
+                {
+                    _inputBuffer = _inputBuffer.Substring(0, _inputBuffer.Length - 1);
+                }
+                e.Handled = true;
+            }
+        }
+
+        private void Window_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            // Clear input buffer and focus
+            _inputBuffer = "";
+            this.Focus();
+        }
+
+        private void SetTimerMinutes(int minutes)
+        {
+            // Set minute value and start timer
+            OnSetTimeAndStart?.Invoke(minutes);
         }
 
         protected override void OnClosed(EventArgs e)
         {
             _timerModel.PropertyChanged -= TimerModel_PropertyChanged;
+            this.LocationChanged -= FullscreenDisplayWindow_LocationChanged;
             base.OnClosed(e);
         }
 
         // Event to notify controller that fullscreen was exited
         public event Action? OnExitFullscreen;
+        
+        // Event to set time and start timer
+        public event Action<int>? OnSetTimeAndStart;
+        
+        // Event to notify when screen changes
+        public event Action<int>? OnScreenChanged;
     }
 }

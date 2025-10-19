@@ -126,15 +126,25 @@ namespace TikTak.Windows
 
         private void SetTimeButton_Click(object sender, RoutedEventArgs e)
         {
-            if (int.TryParse(MinutesInput.Text, out int minutes) && minutes > 0)
+            if (int.TryParse(MinutesInput.Text, out int minutes))
             {
-                _timerService.SetTime(minutes);
-                StatusText.Text = $"Süre {minutes} dakika olarak ayarlandı";
+                if (minutes >= 1 && minutes <= 999)
+                {
+                    _timerService.SetTime(minutes);
+                    StatusText.Text = $"Süre {minutes} dakika olarak ayarlandı";
+                }
+                else if (minutes == 0)
+                {
+                    StatusText.Text = "⚠️ 0 dakika ayarlanamaz (minimum 1 dakika)";
+                }
+                else if (minutes > 999)
+                {
+                    StatusText.Text = "⚠️ Maksimum 999 dakika";
+                }
             }
             else
             {
-                System.Windows.MessageBox.Show("Geçerli bir dakika değeri girin (1 veya daha büyük).", "Geçersiz Giriş", MessageBoxButton.OK, MessageBoxImage.Warning);
-                StatusText.Text = "Geçersiz giriş";
+                StatusText.Text = "⚠️ Geçersiz giriş (1-999 arası sayı girin)";
             }
             
             this.Focus(); // Focus main window
@@ -184,13 +194,20 @@ namespace TikTak.Windows
 
             if (sender is System.Windows.Controls.TextBox textBox)
             {
-                if (string.IsNullOrWhiteSpace(textBox.Text) || !int.TryParse(textBox.Text, out int value) || value <= 0)
+                if (string.IsNullOrWhiteSpace(textBox.Text) || !int.TryParse(textBox.Text, out int value))
                 {
                     textBox.Text = "20";
+                    StatusText.Text = "⚠️ Geçersiz değer, 20 dakika ayarlandı";
+                }
+                else if (value < 1)
+                {
+                    textBox.Text = "1";
+                    StatusText.Text = "⚠️ Minimum 1 dakika";
                 }
                 else if (value > 999)
                 {
                     textBox.Text = "999";
+                    StatusText.Text = "⚠️ Maksimum 999 dakika";
                 }
             }
         }
@@ -251,6 +268,61 @@ namespace TikTak.Windows
             StatusText.Text = "1 dakika çıkarıldı";
         }
 
+        private void ZeroButton_Click(object sender, RoutedEventArgs e)
+        {
+            // Stop timer if running
+            if (_timerModel.IsRunning)
+            {
+                _timerService.Stop();
+                ResetPlayPauseButton();
+            }
+            
+            _timerService.SetTime(0);
+            StatusText.Text = "Sayaç sıfırlandı ve durduruldu (0:00)";
+        }
+
+        private void AddMinutesInput_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
+        {
+            if (e.Key == Key.Enter)
+            {
+                AddMinutesFromInput();
+                e.Handled = true;
+            }
+        }
+
+        private void AddMinutesButton_Click(object sender, RoutedEventArgs e)
+        {
+            AddMinutesFromInput();
+        }
+
+        private void AddMinutesFromInput()
+        {
+            if (!int.TryParse(AddMinutesInput.Text, out int minutes))
+            {
+                StatusText.Text = "⚠️ Geçersiz değer (1-999 arası sayı girin)";
+                AddMinutesInput.Text = "5";
+            }
+            else if (minutes < 1)
+            {
+                StatusText.Text = "⚠️ Minimum 1 dakika eklenebilir";
+                AddMinutesInput.Text = "1";
+            }
+            else if (minutes > 999)
+            {
+                StatusText.Text = "⚠️ Maksimum 999 dakika eklenebilir";
+                AddMinutesInput.Text = "999";
+            }
+            else
+            {
+                for (int i = 0; i < minutes; i++)
+                {
+                    _timerService.AddMinute();
+                }
+                StatusText.Text = $"{minutes} dakika eklendi";
+                AddMinutesInput.Text = "5"; // Reset to default
+            }
+        }
+
         private void ShowButton_Click(object sender, RoutedEventArgs e)
         {
             try
@@ -291,14 +363,105 @@ namespace TikTak.Windows
                         StatusText.Text = $"Sayaç {minutes} dakika ile başlatıldı";
                     };
                     
+                    _displayWindow.OnPositionManuallyChanged += () =>
+                    {
+                        // Switch to Custom position when manually moved
+                        SetPositionComboBoxToCustom();
+                    };
+                    
+                    _displayWindow.OnScreenChanged += (newScreenIndex) =>
+                    {
+                        // Update ScreenComboBox when window moves to different screen
+                        foreach (System.Windows.Controls.ComboBoxItem item in ScreenComboBox.Items)
+                        {
+                            if (item.Tag?.ToString() == newScreenIndex.ToString())
+                            {
+                                ScreenComboBox.SelectedItem = item;
+                                StatusText.Text = $"Sayaç {newScreenIndex + 1}. ekrana taşındı";
+                                
+                                // Move fullscreen window to same screen if it's open
+                                if (_fullscreenWindow != null && _fullscreenWindow.IsLoaded && _fullscreenWindow.IsVisible)
+                                {
+                                    // Close and reopen fullscreen on new screen
+                                    _fullscreenWindow.Close();
+                                    _fullscreenWindow = new FullscreenDisplayWindow(_timerModel, newScreenIndex);
+                                    
+                                    // Re-subscribe to events
+                                    _fullscreenWindow.OnExitFullscreen += () =>
+                                    {
+                                        FullscreenButton.Content = "⛶ Tam Ekran";
+                                        FullscreenButton.Background = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(155, 89, 182));
+                                        StatusText.Text = "Tam ekrandan çıkıldı";
+                                        _fullscreenWindow = null;
+                                    };
+                                    
+                                    _fullscreenWindow.OnSetTimeAndStart += (minutes) =>
+                                    {
+                                        _timerService.SetTime(minutes);
+                                        if (!_timerModel.IsRunning)
+                                        {
+                                            _timerService.Start();
+                                            PlayPauseButton.Content = "⏸";
+                                            PlayPauseButton.ToolTip = "Duraklat";
+                                            PlayPauseButton.Background = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(243, 156, 18));
+                                        }
+                                    };
+                                    
+                                    _fullscreenWindow.OnScreenChanged += (fsNewScreenIndex) =>
+                                    {
+                                        foreach (System.Windows.Controls.ComboBoxItem fsItem in ScreenComboBox.Items)
+                                        {
+                                            if (fsItem.Tag?.ToString() == fsNewScreenIndex.ToString())
+                                            {
+                                                ScreenComboBox.SelectedItem = fsItem;
+                                                if (_displayWindow != null && _displayWindow.IsLoaded && _displayWindow.IsVisible)
+                                                {
+                                                    _displayWindow.SetScreen(fsNewScreenIndex);
+                                                }
+                                                break;
+                                            }
+                                        }
+                                    };
+                                    
+                                    _fullscreenWindow.Show();
+                                }
+                                
+                                break;
+                            }
+                        }
+                    };
+                    
                     // Apply selected position on first load
                     _displayWindow.Loaded += (s, args) => {
-                        if (PositionComboBox.SelectedItem is System.Windows.Controls.ComboBoxItem selectedItem)
+                        // Load last saved position and screen from settings
+                        var settingsService = new SettingsService();
+                        var settings = settingsService.LoadSettings();
+                        
+                        // Restore screen
+                        if (settings.LastScreenIndex >= 0 && settings.LastScreenIndex < ScreenComboBox.Items.Count)
                         {
-                            var position = selectedItem.Tag?.ToString();
-                            if (!string.IsNullOrEmpty(position))
+                            ScreenComboBox.SelectedIndex = settings.LastScreenIndex;
+                        }
+                        
+                        // Restore position
+                        if (settings.LastPosition == "Custom")
+                        {
+                            // Restore custom position
+                            SetPositionComboBoxToCustom();
+                            _displayWindow.Left = settings.LastCustomLeft;
+                            _displayWindow.Top = settings.LastCustomTop;
+                        }
+                        else
+                        {
+                            // Restore named position
+                            foreach (System.Windows.Controls.ComboBoxItem item in PositionComboBox.Items)
                             {
-                                _displayWindow.SetPosition(position);
+                                if (item.Tag?.ToString() == settings.LastPosition)
+                                {
+                                    PositionComboBox.SelectedItem = item;
+                                    _displayWindow.SetPosition(settings.LastPosition);
+                                    break;
+                                }
                             }
                         }
                     };
@@ -323,9 +486,42 @@ namespace TikTak.Windows
         {
             if (_displayWindow != null && _displayWindow.IsLoaded)
             {
+                // Save current position before hiding
+                SaveDisplayWindowPosition();
+                
                 _displayWindow.Hide();
                 StatusText.Text = "Sayaç gizlendi";
             }
+        }
+        
+        private void SaveDisplayWindowPosition()
+        {
+            if (_displayWindow == null || !_displayWindow.IsLoaded)
+                return;
+                
+            var settingsService = new SettingsService();
+            var settings = settingsService.LoadSettings();
+            
+            // Save screen
+            settings.LastScreenIndex = ScreenComboBox.SelectedIndex;
+            
+            // Save position
+            if (PositionComboBox.SelectedItem is System.Windows.Controls.ComboBoxItem selectedItem)
+            {
+                var position = selectedItem.Tag?.ToString();
+                if (position == "Custom")
+                {
+                    settings.LastPosition = "Custom";
+                    settings.LastCustomLeft = _displayWindow.Left;
+                    settings.LastCustomTop = _displayWindow.Top;
+                }
+                else if (!string.IsNullOrEmpty(position))
+                {
+                    settings.LastPosition = position;
+                }
+            }
+            
+            settingsService.SaveSettings(settings);
         }
 
         private void FullscreenButton_Click(object sender, RoutedEventArgs e)
@@ -359,6 +555,45 @@ namespace TikTak.Windows
                     FullscreenButton.Background = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(155, 89, 182));
                     StatusText.Text = "Tam ekrandan çıkıldı";
                     _fullscreenWindow = null;
+                };
+
+                // Listen to set time and start event (when user types minutes in fullscreen)
+                _fullscreenWindow.OnSetTimeAndStart += (minutes) =>
+                {
+                    _timerService.SetTime(minutes);
+                    if (!_timerModel.IsRunning)
+                    {
+                        _timerService.Start();
+                        PlayPauseButton.Content = "⏸";
+                        PlayPauseButton.ToolTip = "Duraklat";
+                        PlayPauseButton.Background = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(243, 156, 18)); // Orange
+                        StatusText.Text = $"{minutes} dakika ayarlandı ve başlatıldı";
+                    }
+                    else
+                    {
+                        StatusText.Text = $"{minutes} dakika ayarlandı";
+                    }
+                };
+                
+                // Listen to screen change event from fullscreen
+                _fullscreenWindow.OnScreenChanged += (newScreenIndex) =>
+                {
+                    // Update the screen dropdown
+                    foreach (System.Windows.Controls.ComboBoxItem item in ScreenComboBox.Items)
+                    {
+                        if (item.Tag?.ToString() == newScreenIndex.ToString())
+                        {
+                            ScreenComboBox.SelectedItem = item;
+                            StatusText.Text = $"Tam ekran {newScreenIndex + 1}. ekrana taşındı";
+                            
+                            // Move display window to same screen if it's open
+                            if (_displayWindow != null && _displayWindow.IsLoaded && _displayWindow.IsVisible)
+                            {
+                                _displayWindow.SetScreen(newScreenIndex);
+                            }
+                            break;
+                        }
+                    }
                 };
                 
                 _fullscreenWindow.Show();
@@ -437,9 +672,23 @@ namespace TikTak.Windows
             if (_displayWindow != null && _displayWindow.IsLoaded && PositionComboBox.SelectedItem is System.Windows.Controls.ComboBoxItem selectedItem)
             {
                 var position = selectedItem.Tag?.ToString();
-                if (!string.IsNullOrEmpty(position))
+                if (!string.IsNullOrEmpty(position) && position != "Custom")
                 {
                     _displayWindow.SetPosition(position);
+                }
+                // If Custom is selected, don't change position
+            }
+        }
+        
+        private void SetPositionComboBoxToCustom()
+        {
+            // Find and select the Custom item
+            foreach (System.Windows.Controls.ComboBoxItem item in PositionComboBox.Items)
+            {
+                if (item.Tag?.ToString() == "Custom")
+                {
+                    PositionComboBox.SelectedItem = item;
+                    break;
                 }
             }
         }
@@ -634,14 +883,15 @@ namespace TikTak.Windows
                     // Move DisplayWindow to selected screen
                     _displayWindow.SetScreen(screenIndex);
                     
-                    // Adjust position according to current position selection
+                    // Only apply position if not in Custom mode
                     if (PositionComboBox.SelectedItem is System.Windows.Controls.ComboBoxItem positionItem)
                     {
                         var position = positionItem.Tag?.ToString();
-                        if (!string.IsNullOrEmpty(position))
+                        if (!string.IsNullOrEmpty(position) && position != "Custom")
                         {
                             _displayWindow.SetPosition(position);
                         }
+                        // If Custom mode, SetScreen already preserved relative position
                     }
 
                     StatusText.Text = $"Sayaç şu ekrana taşındı: {selectedItem.Content}";
@@ -796,6 +1046,9 @@ namespace TikTak.Windows
         
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
+            // Save display window position before closing
+            SaveDisplayWindowPosition();
+            
             // When X button is clicked, don't close window, just hide it
             e.Cancel = true;
             this.Hide();

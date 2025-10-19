@@ -70,6 +70,12 @@ namespace TikTak.Services
         public bool OneMinuteWarning { get; set; } = true;
         public string DisplaySize { get; set; } = "Small";
         public string DisplayMargin { get; set; } = "Minimal";
+        
+        // Window position settings
+        public string LastPosition { get; set; } = "TopRight";
+        public int LastScreenIndex { get; set; } = 0;
+        public double LastCustomLeft { get; set; } = 0;
+        public double LastCustomTop { get; set; } = 0;
     }
 
     public class TimerTheme
@@ -125,7 +131,7 @@ namespace TikTak.Services
                     BackgroundColor = "DarkGreen",
                     FontColor = "White",
                     Description = "Yeşil tema (Yeşil zemin / Beyaz yazı)",
-                    Icon = "🟢"
+                    Icon = "🌲"
                 }
             };
         }

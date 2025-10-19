@@ -43,6 +43,7 @@
             <Setter Property="Background" Value="White"/>
             <Setter Property="BorderBrush" Value="#BDC3C7"/>
             <Setter Property="BorderThickness" Value="1"/>
+            <EventSetter Event="PreviewMouseWheel" Handler="ComboBox_PreviewMouseWheel"/>
         </Style>
         
         <!-- Modern TextBox Style -->
@@ -134,6 +135,7 @@
                                 
                                 <TextBlock Grid.Column="0" Text="Kenar:" VerticalAlignment="Center"/>
                                 <ComboBox x:Name="DisplayMarginComboBox" Grid.Column="1" Style="{StaticResource ModernComboBox}" SelectionChanged="DisplayMarginComboBox_SelectionChanged">
+                                    <ComboBoxItem Content="Boşluk Yok (0px)" Tag="None"/>
                                     <ComboBoxItem Content="Yakın (10px)" Tag="Close"/>
                                     <ComboBoxItem Content="Normal (20px)" Tag="Normal" IsSelected="True"/>
                                     <ComboBoxItem Content="Uzak (40px)" Tag="Far"/>
@@ -202,6 +204,16 @@
                                 <TextBlock Grid.Column="0" Text="Sıfırla:" VerticalAlignment="Center"/>
                                 <TextBlock Grid.Column="1" Text="F7" FontWeight="Bold" VerticalAlignment="Center" HorizontalAlignment="Right"/>
                             </Grid>
+                            <Grid Margin="0,4">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="120"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Grid.Column="0" Text="Sayaç Pozisyon:" VerticalAlignment="Center"/>
+                                <TextBlock Grid.Column="1" Text="W/A/S/D" FontWeight="Bold" VerticalAlignment="Center" HorizontalAlignment="Right"/>
+                            </Grid>
+                            <TextBlock Text="W=Üste, A=Sola, S=Alta, D=Sağa (mevcut pozisyondan)" 
+                                       FontStyle="Italic" FontSize="10" Foreground="Gray" Margin="0,0,0,4"/>
                         </StackPanel>
                     </GroupBox>
 

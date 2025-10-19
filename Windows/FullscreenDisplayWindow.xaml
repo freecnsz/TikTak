@@ -18,17 +18,31 @@
                 BorderThickness="0"
                 BorderBrush="White">
             <Viewbox Margin="100" Stretch="Uniform">
-                <TextBlock x:Name="TimeDisplay" 
-                           Text="20:00" 
-                           FontSize="200" 
-                           FontWeight="Bold"
-                           Foreground="White"
-                           HorizontalAlignment="Center"
-                           VerticalAlignment="Center"
-                           FontFamily="Segoe UI, Arial, sans-serif"
-                           TextAlignment="Center"
-                           TextOptions.TextFormattingMode="Display"
-                           TextOptions.TextRenderingMode="Aliased"/>
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                    <!-- Minus sign for negative time -->
+                    <TextBlock x:Name="MinusSign" 
+                               Text="-" 
+                               FontSize="200" 
+                               FontWeight="Bold"
+                               Foreground="White"
+                               VerticalAlignment="Center"
+                               FontFamily="Segoe UI, Arial, sans-serif"
+                               TextOptions.TextFormattingMode="Display"
+                               TextOptions.TextRenderingMode="Aliased"
+                               Visibility="Collapsed"
+                               Margin="0,0,-20,0"/>
+                    
+                    <!-- Main time display -->
+                    <TextBlock x:Name="TimeDisplay" 
+                               Text="20:00" 
+                               FontSize="200" 
+                               FontWeight="Bold"
+                               Foreground="White"
+                               VerticalAlignment="Center"
+                               FontFamily="Segoe UI, Arial, sans-serif"
+                               TextOptions.TextFormattingMode="Display"
+                               TextOptions.TextRenderingMode="Aliased"/>
+                </StackPanel>
             </Viewbox>
         </Border>
     </Grid>

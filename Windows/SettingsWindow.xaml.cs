@@ -202,7 +202,7 @@ namespace TikTak.Windows
             }
         }
 
-        private void SaveButton_Click(object sender, RoutedEventArgs e)
+        private async void SaveButton_Click(object sender, RoutedEventArgs e)
         {
             try
             {
@@ -222,15 +222,16 @@ namespace TikTak.Windows
                 
                 ApplySettingsToDisplayWindow();
                 
-                ShowToastMessage("Ayarlar kaydedildi", "#27AE60");
+                await ShowToastMessageAsync("Ayarlar kaydedildi", "#27AE60");
+                this.Close();
             }
             catch (Exception ex)
             {
-                ShowToastMessage($"Error: {ex.Message}", "#E74C3C");
+                await ShowToastMessageAsync($"Error: {ex.Message}", "#E74C3C");
             }
         }
 
-        private void ResetButton_Click(object sender, RoutedEventArgs e)
+        private async void ResetButton_Click(object sender, RoutedEventArgs e)
         {
             // Varsayılan ayarları yükle
             _settings = new AppSettings();
@@ -242,7 +243,14 @@ namespace TikTak.Windows
             FiveMinuteWarningCheckBox.IsChecked = _settings.FiveMinuteWarning;
             OneMinuteWarningCheckBox.IsChecked = _settings.OneMinuteWarning;
             
-            ShowToastMessage("Varsayılan ayarlara sıfırlandı (Kaydetmeyi unutmayın!)", "#F39C12");
+            // Ayarları kaydet (ekran ve pozisyon da sıfırlanır)
+            _settingsService.SaveSettings(_settings);
+            
+            // Display window'a uygula
+            ApplySettingsToDisplayWindow();
+            
+            await ShowToastMessageAsync("Varsayılan ayarlara sıfırlandı", "#F39C12");
+            this.Close();
         }
 
         private void AboutButton_Click(object sender, RoutedEventArgs e)
@@ -252,7 +260,7 @@ namespace TikTak.Windows
             aboutWindow.ShowDialog();
         }
 
-        private void CancelButton_Click(object sender, RoutedEventArgs e)
+        private async void CancelButton_Click(object sender, RoutedEventArgs e)
         {
             if (_originalSettings != null)
             {
@@ -266,16 +274,24 @@ namespace TikTak.Windows
                     _fullscreenWindow.ApplySettings(_originalSettings);
                 }
             }
+            
+            await ShowToastMessageAsync("İptal edildi", "#95A5A6");
             this.Close();
         }
         
-        private async void ShowToastMessage(string message, string color = "#27AE60")
+        private void ComboBox_PreviewMouseWheel(object sender, System.Windows.Input.MouseWheelEventArgs e)
+        {
+            // Prevent ComboBox from changing value on scroll
+            e.Handled = true;
+        }
+        
+        private async Task ShowToastMessageAsync(string message, string color = "#27AE60")
         {
             ToastText.Text = message;
             ToastMessage.Background = new SolidColorBrush((System.Windows.Media.Color)System.Windows.Media.ColorConverter.ConvertFromString(color));
             ToastMessage.Visibility = Visibility.Visible;
 
-            await Task.Delay(1500);
+            await Task.Delay(800);
             ToastMessage.Visibility = Visibility.Collapsed;
         }
         
