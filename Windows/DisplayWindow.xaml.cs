@@ -231,19 +231,29 @@ namespace TikTak.Windows
                 var screen = screens[screenIndex];
                 var workingArea = screen.WorkingArea;
                 
+                // Get DPI scale factor
+                var dpiScale = GetDpiScale();
+                
                 // Use default values if window size not yet determined
                 var windowWidth = ActualWidth > 0 ? ActualWidth : 130;
                 var windowHeight = ActualHeight > 0 ? ActualHeight : 45;
                 
+                // Convert physical screen coordinates to WPF logical units
+                var scaledLeft = workingArea.Left / dpiScale;
+                var scaledTop = workingArea.Top / dpiScale;
+                var scaledWidth = workingArea.Width / dpiScale;
+                var scaledHeight = workingArea.Height / dpiScale;
+                
                 // Center of screen
-                Left = workingArea.Left + (workingArea.Width - windowWidth) / 2;
-                Top = workingArea.Top + (workingArea.Height - windowHeight) / 2;
+                Left = scaledLeft + (scaledWidth - windowWidth) / 2;
+                Top = scaledTop + (scaledHeight - windowHeight) / 2;
                 
                 // Fix position if outside screen bounds
-                if (Left < workingArea.Left) Left = workingArea.Left + 20;
-                if (Top < workingArea.Top) Top = workingArea.Top + 20;
-                if (Left + windowWidth > workingArea.Right) Left = workingArea.Right - windowWidth - 20;
-                if (Top + windowHeight > workingArea.Bottom) Top = workingArea.Bottom - windowHeight - 20;
+                var safeMargin = 20 / dpiScale;
+                if (Left < scaledLeft) Left = scaledLeft + safeMargin;
+                if (Top < scaledTop) Top = scaledTop + safeMargin;
+                if (Left + windowWidth > scaledLeft + scaledWidth) Left = scaledLeft + scaledWidth - windowWidth - safeMargin;
+                if (Top + windowHeight > scaledTop + scaledHeight) Top = scaledTop + scaledHeight - windowHeight - safeMargin;
             }
         }
 
@@ -259,50 +269,60 @@ namespace TikTak.Windows
                 var screen = screens[_currentScreenIndex];
                 var workingArea = screen.WorkingArea;
                 
-                // Window dimensions
+                // Get DPI scale factor for accurate positioning
+                var dpiScale = GetDpiScale();
+                
+                // Window dimensions - use actual size if available, otherwise use defaults
                 var windowWidth = ActualWidth > 0 ? ActualWidth : 130;
                 var windowHeight = ActualHeight > 0 ? ActualHeight : 45;
                 
                 // Get margin from settings
                 int margin = GetMarginPixels();
                 
+                // Convert physical screen coordinates to WPF logical units
+                var scaledLeft = workingArea.Left / dpiScale;
+                var scaledTop = workingArea.Top / dpiScale;
+                var scaledWidth = workingArea.Width / dpiScale;
+                var scaledHeight = workingArea.Height / dpiScale;
+                var scaledMargin = margin / dpiScale;
+                
                 switch (position)
                 {
                     case "TopLeft":
-                        Left = workingArea.Left + margin;
-                        Top = workingArea.Top + margin;
+                        Left = scaledLeft + scaledMargin;
+                        Top = scaledTop + scaledMargin;
                         break;
                     case "TopCenter":
-                        Left = workingArea.Left + (workingArea.Width - windowWidth) / 2;
-                        Top = workingArea.Top + margin;
+                        Left = scaledLeft + (scaledWidth - windowWidth) / 2;
+                        Top = scaledTop + scaledMargin;
                         break;
                     case "TopRight":
-                        Left = workingArea.Right - windowWidth - margin;
-                        Top = workingArea.Top + margin;
+                        Left = scaledLeft + scaledWidth - windowWidth - scaledMargin;
+                        Top = scaledTop + scaledMargin;
                         break;
                     case "MiddleLeft":
-                        Left = workingArea.Left + margin;
-                        Top = workingArea.Top + (workingArea.Height - windowHeight) / 2;
+                        Left = scaledLeft + scaledMargin;
+                        Top = scaledTop + (scaledHeight - windowHeight) / 2;
                         break;
                     case "Center":
-                        Left = workingArea.Left + (workingArea.Width - windowWidth) / 2;
-                        Top = workingArea.Top + (workingArea.Height - windowHeight) / 2;
+                        Left = scaledLeft + (scaledWidth - windowWidth) / 2;
+                        Top = scaledTop + (scaledHeight - windowHeight) / 2;
                         break;
                     case "MiddleRight":
-                        Left = workingArea.Right - windowWidth - margin;
-                        Top = workingArea.Top + (workingArea.Height - windowHeight) / 2;
+                        Left = scaledLeft + scaledWidth - windowWidth - scaledMargin;
+                        Top = scaledTop + (scaledHeight - windowHeight) / 2;
                         break;
                     case "BottomLeft":
-                        Left = workingArea.Left + margin;
-                        Top = workingArea.Bottom - windowHeight - margin;
+                        Left = scaledLeft + scaledMargin;
+                        Top = scaledTop + scaledHeight - windowHeight - scaledMargin;
                         break;
                     case "BottomCenter":
-                        Left = workingArea.Left + (workingArea.Width - windowWidth) / 2;
-                        Top = workingArea.Bottom - windowHeight - margin;
+                        Left = scaledLeft + (scaledWidth - windowWidth) / 2;
+                        Top = scaledTop + scaledHeight - windowHeight - scaledMargin;
                         break;
                     case "BottomRight":
-                        Left = workingArea.Right - windowWidth - margin;
-                        Top = workingArea.Bottom - windowHeight - margin;
+                        Left = scaledLeft + scaledWidth - windowWidth - scaledMargin;
+                        Top = scaledTop + scaledHeight - windowHeight - scaledMargin;
                         break;
                 }
             }
@@ -317,6 +337,17 @@ namespace TikTak.Windows
                 "Far" => 40,
                 _ => 20
             };
+        }
+
+        private double GetDpiScale()
+        {
+            // Get DPI scaling factor for the current monitor
+            var source = PresentationSource.FromVisual(this);
+            if (source?.CompositionTarget != null)
+            {
+                return source.CompositionTarget.TransformToDevice.M11;
+            }
+            return 1.0; // Default to 100% scaling if unable to determine
         }
 
         private void DisplayWindow_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)

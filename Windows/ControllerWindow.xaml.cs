@@ -56,8 +56,10 @@ namespace TikTak.Windows
             // Listen for display changes
             SystemEvents.DisplaySettingsChanged += SystemEvents_DisplaySettingsChanged;
             
-            Left = 50;
-            Top = 50;
+            // Set initial position accounting for DPI scaling
+            var dpiScale = GetDpiScale();
+            Left = 50 / dpiScale;
+            Top = 50 / dpiScale;
         }
 
         private void TimerModel_PropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
@@ -761,6 +763,17 @@ namespace TikTak.Windows
         public NotifyIcon? GetNotifyIcon()
         {
             return _notifyIcon;
+        }
+
+        private double GetDpiScale()
+        {
+            // Get DPI scaling factor for the current monitor
+            var source = System.Windows.PresentationSource.FromVisual(this);
+            if (source?.CompositionTarget != null)
+            {
+                return source.CompositionTarget.TransformToDevice.M11;
+            }
+            return 1.0; // Default to 100% scaling if unable to determine
         }
     }
 }
