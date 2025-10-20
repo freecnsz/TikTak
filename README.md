@@ -1,101 +1,114 @@
-# TikTak - Profesyonel Sunum Sayacı
+# TikTak - Professional Presentation Timer
 
-**TikTak**, kongre, seminer ve sunum organizasyonları için özel olarak tasarlanmış modern bir zamanlayıcı uygulamasıdır. Kullanıcı dostu arayüzü ve güçlü özellikleri ile profesyonel etkinliklerde zaman yönetimini kolaylaştırır.
+TikTak is a modern timer application designed specifically for conferences, seminars, and professional presentations. With its intuitive interface and powerful feature set, it ensures smooth and effective time management during events.
 
-## ✨ Temel Özellikler
+## Key Features
 
-- **🎤 Sunum Optimizasyonu**: Kongre ve seminerlerde kullanım için özel tasarım
-- **🎨 Çoklu Tema Desteği**: 5 farklı renk teması (Koyu, Açık, Koyu Mavi, Açık Mavi, Yeşil)
-- **🌍 Çok Dilli Mesajlar**: Türkçe ve İngilizce "süre bitti" mesajları
-- **🔔 Akıllı Bildirimler**: 5 dakika ve 1 dakika uyarı sistemi
-- **🚀 Sistem Tepsisi**: Ctrl+Shift+T ile hızlı erişim
-- **⚡ Global Kısayollar**: F5 (Başlat/Durdur), F7 (Sıfırla)
-- **🔄 Negatif Sayım**: Süre bitince devam eden sayaç
-- **🖱️ Sürüklenebilir**: Ekranda istediğiniz yere yerleştirin
+### Display and Positioning
+- **Full-Screen Presentation Mode** - Optimized for on-stage use with clear, large visual display
+- **Custom Positioning & Smart Alignment** - Place the timer anywhere on the screen with pixel-perfect control
+- **WASD Keyboard Navigation** - Move and position the timer quickly using keyboard controls
+- **Multi-Screen Support & Position Memory** - Automatically restores window positions across multiple displays
+- **Auto Screen Detection** - Detects screen changes and repositions intelligently
+- **Transparent & Draggable UI** - Smooth, flexible window placement
+- **Always-on-Top Mode** - Keeps the timer visible during presentations
+- **DPI Scaling Support** - Fully compatible with high-DPI displays
 
-## 🚀 Hızlı Başlangıç
+### Timer Controls
+- **Flexible Time Setting** - Supports 1 to 999 minutes for diverse session types
+- **Quick Time Adjustment Buttons** - +1, -1, +5, -5, and Reset for fast manual tuning
+- **Negative Counting Mode** - Continue counting beyond zero to track overtime
+- **Global Keyboard Shortcuts** - Control the timer even when the window is unfocused
 
-### Sistem Gereksinimleri
-- Windows 10/11
+### Customization
+- **5 Theme Options** - Light, Dark, Light Blue, Dark Blue, and Green
+- **3 Size Levels** - Small, Medium, and Large display options
+- **4 Edge Margin Settings** - Adjustable distance from screen edges
+- **Multi-Language Support** - Turkish and English interface
+
+### Notifications
+- **Smart Notification System** - Automatic alerts at 5-minute and 1-minute marks
+- **Desktop Notifications** - System popups for time warnings
+- **System Tray Integration** - Quick show/hide and control from the tray
+
+## Quick Start
+
+### System Requirements
+- Windows 10 or later
 - .NET 9.0 Runtime
 
-### Kurulum
-1. Repository'yi klonlayın:
-   ```bash
-   git clone https://github.com/freecnsz/TikTak.git
-   cd tiktak
-   ```
+### Installation
 
-2. Uygulamayı derleyin ve çalıştırın:
-   ```bash
-   dotnet build
-   dotnet run
-   ```
+**Option 1: Install via Winget**
+```bash
+winget install freecnsz.TikTak
+```
 
-## 🎮 Kullanım Kılavuzu
+**Option 2: Manual Installation**
+```bash
+git clone https://github.com/freecnsz/TikTak.git
+cd TikTak
+dotnet build
+dotnet run
+```
 
-### Temel Kullanım
-1. **Süre Ayarlama**: İnput kutularına dakika girin
-2. **Başlatma**: ▶️ butonuna basın
-3. **Duraklatma**: ⏸️ butonuna basın
-4. **Sıfırlama**: 🔄 butonuna basın
+## User Guide
 
-### Klavye Kısayolları
-| Kısayol | İşlev |
-|---------|-------|
-| `Ctrl+Shift+T` | Göster/Gizle |
-| `F5` | Başlat/Durdur |
-| `F7` | Sıfırla |
-| `ESC` | Kapat ve sıfırla |
+### Basic Usage
+1. **Set Duration** - Enter the desired time in minutes
+2. **Start Timer** - Click the play button or press `F5`
+3. **Pause Timer** - Click the pause button or press `F5` again
+4. **Reset Timer** - Click the reset button or press `F7`
 
-### Sistem Tepsisi
-- **Çift tık**: Pencereyi aç/kapat
-- **Sağ tık**: Menü (Ayarlar, Hakkında, Çıkış)
-- **Hover**: Mevcut durum bilgisi
+### Keyboard Shortcuts
+| Shortcut | Action |
+|----------|--------|
+| `Ctrl+Shift+T` | Show/Hide the timer |
+| `F5` | Start/Pause |
+| `F7` | Reset |
+| `ESC` | Close and reset |
 
-## ⚙️ Konfigürasyon
+### System Tray Integration
+- **Double-click** - Show or hide the window
+- **Right-click** - Open menu (Settings, About, Exit)
+- **Hover** - View current timer status
 
-Ayarlar penceresi üzerinden:
-- **Tema seçimi**: 5 farklı renk kombinasyonu
-- **Dil ayarı**: Türkçe/İngilizce süre bitti mesajları
-- **Bildirimler**: 5dk/1dk uyarıları açma/kapama
-- **Masaüstü bildirimleri**: Sistem bildirimi kontrolü
+## Configuration
 
-## 🏗️ Teknik Detaylar
+Access the settings window to customize:
+- Theme selection (5 color options)
+- Language preference (TR/EN)
+- Notification alerts (5-minute and 1-minute warnings)
+- Desktop notification popups
+- Screen positioning and alignment
+- Display size and edge margins
 
-### Mimari
-- **Framework**: .NET 9.0 WPF
-- **Desen**: MVVM (Model-View-ViewModel)
-- **Sistem Entegrasyonu**: Windows Forms NotifyIcon
-- **Veri Saklama**: JSON tabanlı ayarlar
+## Technical Overview
 
-### Proje Yapısı
+### Architecture
+- **Framework** - .NET 9.0 (WPF)
+- **Design Pattern** - MVVM (Model-View-ViewModel)
+- **System Integration** - Windows Forms NotifyIcon
+- **Data Storage** - JSON configuration
+
+### Project Structure
 ```
 TikTak/
-├── Models/           # Veri modelleri
-├── Services/         # İş mantığı servisleri
-├── Windows/          # UI pencereleri
-└── Resources/        # Görseller ve kaynaklar
+├── Models/           # Data models
+├── Services/         # Business logic services
+├── Windows/          # User interface windows
+└── Resources/        # Images and assets
 ```
 
-## 📋 Changelog
+## Support
 
-### v1.0.0 (Ekim 2025)
-- İlk sürüm yayını
-- Temel zamanlayıcı özellikleri
-- Çoklu tema desteği
-- Sistem tepsisi entegrasyonu
-- Çok dilli mesaj desteği
+- **Report Issues** - [GitHub Issues](https://github.com/freecnsz/TikTak/issues)
+- **Request Features** - [GitHub Discussions](https://github.com/freecnsz/TikTak/discussions)
 
-## Destek
+## License
 
-- **Hata Bildirim**: [Issues](https://github.com/freecnsz/TikTak/issues)
-- **Özellik İsteği**: [Discussions](https://github.com/freecnsz/TikTak/discussions)
-
-## 📄 Lisans
-
-Bu proje [MIT License](LICENSE) altında lisanslanmıştır.
+Licensed under the [MIT License](LICENSE).
 
 ---
 
-**TikTak** ile profesyonel sunumlarınızda zamanı kontrol edin!
+**TikTak** - Take control of time in your professional presentations.
